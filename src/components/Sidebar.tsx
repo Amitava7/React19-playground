@@ -6,7 +6,7 @@ interface NavItem {
 }
 
 const links: NavItem[] = [
-    { path: '/', label: '🏠 Home' },
+    { path: '/', label: 'Home' },
     { path: '/use-action-state', label: '01 · useActionState' },
     { path: '/use-form-status', label: '02 · useFormStatus' },
     { path: '/use-optimistic', label: '03 · useOptimistic' },

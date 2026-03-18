@@ -1,37 +1,40 @@
-import { useActionState } from "react";
-import { fakeRequest } from "../fakeserver";
+import { useActionState } from 'react'
+import DemoWrapper from '../components/DemoWrapper'
+import { fakeRequest } from '../fakeserver'
 
 interface FormState {
-    success: boolean;
-    error: string | null;
+  error?: string
+  success?: boolean
+  message?: string
 }
 
-async function submitAction(_prevState: FormState, formData: FormData) {
-    const name = formData.get('name');
-    try {
-        await fakeRequest(name, Math.random() < 0.5);
-        return { success: true, error: null }
-    } catch {
-        return { success: false, error: "something went wrong" }
-    }
+async function submitAction(
+  _prevState: FormState | null,
+  formData: FormData
+): Promise<FormState> {
+  const name = formData.get('name') as string
+  if (!name) return { error: 'Name is required' }
+  await fakeRequest(null, { ms: 1500, fail: Math.random() < 0.5 })
+  return { success: true, message: `Hello, ${name}! Form submitted.` }
 }
 
 export default function UseActionStateDemo() {
-    const [state, formAction, isPending] = useActionState(submitAction, { success: false, error: null })
+  const [state, formAction, isPending] = useActionState(submitAction, null)
 
-    return (
-        <form action={formAction}>
-            <input name="name" disabled={isPending} style={state.error ? { border: '1px solid red' } : undefined}
-            />
-            <button type="submit" disabled={isPending}>
-                {isPending ? "submitting" : "submit"}
-            </button>
-            {
-                state.success && <p>Sucess </p>
-            }
-            {
-                state.error && <p>failue</p>
-            }
-        </form>
-    )
+  return (
+    <DemoWrapper
+      title="useActionState"
+      description="Handles async form submission with automatic pending state, error, and result. 50% chance of failure."
+    >
+      <form action={formAction}>
+        <input name="name" placeholder="Enter a name..." disabled={isPending} />
+        <button type="submit" disabled={isPending}>
+          {isPending ? 'Submitting...' : 'Submit'}
+        </button>
+      </form>
+
+      {state?.error && <p style={{ color: '#ef4444' }}>{state.error}</p>}
+      {state?.success && <p style={{ color: '#4ade80' }}>{state.message}</p>}
+    </DemoWrapper>
+  )
 }

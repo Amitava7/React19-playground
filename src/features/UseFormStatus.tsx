@@ -1,31 +1,35 @@
 import { useFormStatus } from 'react-dom'
 import { useActionState } from 'react'
+import DemoWrapper from '../components/DemoWrapper'
 import { fakeRequest } from '../fakeserver'
 
-type Props = {}
-
-function SubmitBtn() {
-    const { pending } = useFormStatus()
-    return (
-        <button type="submit" disabled={pending}> submit</button>
-    )
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button type="submit" disabled={pending}>
+      {pending ? 'Saving...' : 'Save'}
+    </button>
+  )
 }
 
-
-
-function UseFormStatus({ }: Props) {
-    async function submitAction(_prev: null, data: FormData) {
-        await fakeRequest(data.get('name'), false)
-        return null;
-    }
-
-    const [_state, formAction, _isPending] = useActionState(submitAction, null)
-    return (
-        <form action={formAction}>
-            <input name="name" />
-            <SubmitBtn />
-        </form>
-    )
+async function saveAction(): Promise<{ saved: boolean }> {
+  await fakeRequest(null, { ms: 1500 })
+  return { saved: true }
 }
 
-export default UseFormStatus
+export default function UseFormStatusDemo() {
+  const [state, formAction] = useActionState(saveAction, null)
+
+  return (
+    <DemoWrapper
+      title="useFormStatus"
+      description="SubmitButton is a separate component that auto-disables while the parent form is pending. No props needed."
+    >
+      <form action={formAction}>
+        <input name="note" placeholder="Type a note..." />
+        <SubmitButton />
+      </form>
+      {state?.saved && <p style={{ color: '#4ade80' }}>Saved!</p>}
+    </DemoWrapper>
+  )
+}
